@@ -27,21 +27,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-
-      - name: Install conda environment
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Install Micromamba
+        uses: mamba-org/setup-micromamba@v1
         with:
-          activate-environment: jupyter-actions
-          environment-file: .github/environment.yml
-          python-version: 3.7
+          micromamba-version: '1.3.1-0'
+          environment-file: environment.yml
+          init-shell: bash
+          cache-environment: true
+          post-cleanup: 'all'
 
       - name: Install OpenMC
         shell: bash -l {0}
         run: |
-          conda install -n base conda-libmamba-solver
-          conda config --set solver libmamba
-          conda activate jupyter-actions
-          conda install -c conda-forge openmc
+          micromamba activate jupyter-actions
+          micromamba install -c conda-forge openmc==0.14.0
 
       - name: Cache Cross Sections
         id: xs-cache
@@ -65,9 +64,9 @@ jobs:
       - name: Install OpenMOC
         shell: bash -l {0}
         run: |
-          conda init bash
+          micromamba init bash
           source ~/.bashrc
-          conda activate jupyter-actions
+          micromamba activate jupyter-actions
           cd ~
           git clone https://github.com/mit-crpg/openmoc &&
           cd openmoc
@@ -79,5 +78,5 @@ jobs:
       - name: Execute all Notebooks
         shell: bash -l {0}
         run: |
-          conda activate jupyter-actions
+          micromamba activate jupyter-actions
           pytest -v .test
